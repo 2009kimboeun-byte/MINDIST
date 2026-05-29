@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MINDIST - 학습습관 관리 서비스</title>
+  <link rel="stylesheet" href="index.css">
+  <!-- FontAwesome 아이콘 CDN 라이브러리 추가 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- 로그인/회원가입 화면 -->
+    <div id="authScreen" class="auth-screen">
+      <div class="auth-box">
+        <h2 class="auth-logo">MINDIST</h2>
+        <p class="auth-subtitle">학습습관 관리 서비스</p>
+
+        <!-- 로그인 폼 -->
+        <div id="loginFormContainer" class="auth-form-panel">
+          <div class="input-group">
+            <label>이름</label>
+            <input type="text" id="loginName" placeholder="이름을 입력하세요">
+          </div>
+          <div class="input-group">
+            <label>비밀번호</label>
+            <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요">
+          </div>
+          <button id="btnLoginSubmit" class="auth-btn">로그인</button>
+          <p class="auth-switch-text">계정이 없으신가요? <span id="btnGoToSignup">회원가입</span></p>
+        </div>
+
+        <!-- 회원가입 폼 -->
+        <div id="signupFormContainer" class="auth-form-panel" style="display: none;">
+          <div class="input-group">
+            <label>이름</label>
+            <input type="text" id="signupName" placeholder="이름을 입력하세요">
+          </div>
+          <div class="input-group">
+            <label>학교 선택</label>
+            <select id="signupSchool">
+              <option value="" disabled selected>학교를 선택해주세요</option>
+              <option value="사대부고">사대부고</option>
+              <option value="강원고">강원고</option>
+              <option value="춘여고">춘여고</option>
+              <option value="춘천고">춘천고</option>
+              <option value="성수여고">성수여고</option>
+              <option value="성수고">성수고</option>
+              <option value="봉의고">봉의고</option>
+              <option value="유봉여고">유봉여고</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>비밀번호</label>
+            <input type="password" id="signupPassword" placeholder="비밀번호를 설정하세요">
+          </div>
+          <button id="btnSignupSubmit" class="auth-btn">회원가입 완료</button>
+          <p class="auth-switch-text">이미 계정이 있으신가요? <span id="btnGoToLogin">로그인</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 상단 인스타 스타일 헤더 -->
+    <header class="app-header">
+      <h1 class="logo-text" id="logoText">MINDIST</h1>
+      <div class="header-actions">
+        <i class="fa-regular fa-square-plus" id="actionCreateLog" title="기록 추가"></i>
+        <i class="fa-regular fa-heart" title="활동 알림"></i>
+        <i class="fa-solid fa-right-from-bracket" id="btnLogout" title="로그아웃" style="margin-left: 5px;"></i>
+      </div>
+    </header>
+
+    <!-- 다른 사용자 달력 구경 중일 때 나타나는 배너 -->
+    <div id="viewingModeHeader" class="viewing-banner" style="display: none;">
+      <span class="viewing-banner-text">👀 <strong><span id="viewingUserName">홍길동</span></strong> 대원 구경 중 (읽기 전용)</span>
+      <button id="btnBackToMyCalendar" class="back-to-my-calendar-btn">내 달력보기</button>
+    </div>
+
+    <!-- 프로필 요약 카드 -->
+    <section class="profile-section">
+      <div class="profile-top">
+        <div class="avatar-wrapper" id="avatarWrapper" title="프로필 사진 변경">
+          <div class="avatar-img" id="avatarImg">🌸</div>
+          <input type="file" id="profileFileInput" accept="image/*" style="display: none;">
+        </div>
+        <div class="profile-stats">
+          <div class="stat-item" id="statDaysResisted">
+            <div class="stat-label">참아낸 날</div>
+            <div class="stat-number">0일</div>
+          </div>
+          <div class="stat-item" id="statStreak">
+            <div class="stat-label">최장 스트릭</div>
+            <div class="stat-number">0일</div>
+          </div>
+        </div>
+      </div>
+      <div class="profile-bio">
+        <div class="profile-name">양진고등학교 학생</div>
+        <div class="profile-bio-text">
+          학교 근처 유해업소(성인 오락실, 청소년 출입금지 구역 등) 유혹 참기 챌린지 📝<br>
+          스스로 실천한 소소한 일상을 기록하고 가디언즈 뱃지를 모아보세요!
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- 인스타 그리드 형태의 탭 헤더 -->
+    <nav class="tabs-header">
+      <button class="tab-btn active" data-tab="calendarTab" id="tabCalendarBtn" title="달력 보기">
+        <i class="fa-solid fa-calendar-days"></i>
+      </button>
+      <button class="tab-btn" data-tab="feedTab" id="tabFeedBtn" title="피드 목록">
+        <i class="fa-solid fa-list-ul"></i>
+      </button>
+      <button class="tab-btn" data-tab="statsTab" id="tabStatsBtn" title="상세 통계">
+        <i class="fa-solid fa-chart-simple"></i>
+      </button>
+    </nav>
+
+    <!-- 탭 1: 인스타 달력 뷰 -->
+    <div class="tab-content-panel active" id="calendarTab">
+      <div class="calendar-card-wrapper">
+        <!-- 상하단 데코레이션 아이콘 -->
+        <div class="cal-deco cal-deco-top"><span class="icon-chat">💬</span><span class="icon-heart">❤️</span></div>
+        <div class="cal-deco cal-deco-bottom"><span class="icon-chat">💬</span><span class="icon-heart">❤️</span></div>
+
+        <!-- 연도 표시 알약 버튼 -->
+        <div class="calendar-year-pill">
+          <span id="calendarYearText">• 2026 •</span>
+        </div>
+
+        <!-- 월 선택 헤더 (◀ MAY ▶ 형태) -->
+        <div class="calendar-month-selector">
+          <button class="month-nav-btn" id="prevMonthBtn">◀</button>
+          <h3 id="currentMonthText">MAY</h3>
+          <button class="month-nav-btn" id="nextMonthBtn">▶</button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+          <!-- 자바스크립트로 달력 날짜칸 자동 로드 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 탭 2: 일기 피드 뷰 -->
+    <div class="tab-content-panel" id="feedTab">
+      <div class="feed-container" id="feedPosts">
+        <!-- 학생들의 극복 다짐 피드가 들어갑니다 -->
+      </div>
+    </div>
+
+    <!-- 탭 3: 통계 리포트 뷰 -->
+    <div class="tab-content-panel" id="statsTab">
+      <div class="stats-container">
+        <div class="stats-card">
+          <div class="stats-title">나의 수호 리포트</div>
+          <div class="stats-row">
+            <div>
+              <div class="stat-number" id="statsResistRate">0%</div>
+              <div class="stat-label">유혹 극복율</div>
+            </div>
+            <div>
+              <div class="stat-number" id="statsTotalCount">0회</div>
+              <div class="stat-label">누적 참기</div>
+            </div>
+            <div>
+              <div class="stat-number" id="statsStreakDays">0일</div>
+              <div class="stat-label">현재 연속</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-title">도전과제 뱃지 수집 현황</div>
+          <div class="badge-grid" id="badgeGrid">
+            <div class="badge-item" id="badge-pc">
+              <div class="badge-icon">🎮</div>
+              <div class="badge-name">PC방 프리</div>
+            </div>
+            <div class="badge-item" id="badge-sing">
+              <div class="badge-icon">🎤</div>
+              <div class="badge-name">코노 프리</div>
+            </div>
+            <div class="badge-item" id="badge-shop">
+              <div class="badge-icon">🔞</div>
+              <div class="badge-name">유해업소 우회</div>
+            </div>
+            <div class="badge-item" id="badge-streak3">
+              <div class="badge-icon">🔥</div>
+              <div class="badge-name">3일 연속 성공</div>
+            </div>
+            <div class="badge-item" id="badge-streak7">
+              <div class="badge-icon">🏆</div>
+              <div class="badge-name">7일 연속 성공</div>
+            </div>
+            <div class="badge-item" id="badge-guardian">
+              <div class="badge-icon">🌸</div>
+              <div class="badge-name">안전 가디언</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 인스타그램 스타일의 바텀 네비게이션 바 -->
+    <nav class="bottom-nav">
+      <div class="nav-item active" data-tab="calendarTab"><i class="fa-solid fa-house"></i></div>
+      <div class="nav-item" id="btnBottomSearch"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div class="nav-item" id="btnBottomAdd"><i class="fa-regular fa-square-plus"></i></div>
+      <div class="nav-item" id="btnBottomHeart"><i class="fa-regular fa-heart"></i></div>
+      <div class="nav-item" data-tab="statsTab"><i class="fa-regular fa-user"></i></div>
+    </nav>
+
+    <!-- 바텀 모달 슬라이드 (유해시설 참기 입력폼) -->
+    <div class="modal-overlay" id="loggingModal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h4 id="modalDateTitle">날짜 선택 기록</h4>
+          <button class="close-btn" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p class="modal-desc">학교 앞 유해업소 및 시설 방문 여부와 나만의 극복 다짐 또는 오늘의 일기를 남겨주세요.</p>
+
+        <div class="logging-options">
+          <button class="log-option-btn btn-safe" id="optionSafeBtn">
+            <div class="option-icon" style="color: var(--accent-pink);">🌸</div>
+            <div class="option-title">안전 & 우회함</div>
+          </button>
+          <button class="log-option-btn btn-unsafe" id="optionUnsafeBtn">
+            <div class="option-icon" style="color: #888;">⚠️</div>
+            <div class="option-title">방문함</div>
+          </button>
+        </div>
+
+        <textarea class="log-textarea" id="logDiaryText"
+          placeholder="오늘 어떤 유혹이 있었나요? 유혹을 어떻게 이겨냈는지 한 줄 적어보세요! (예: 방과 후 유해시설의 유혹을 견디고 도서관에 방문했다)"></textarea>
+
+        <!-- 읽기 전용 안내 뱃지 -->
+        <div class="readonly-badge" id="readonlyAlert" style="display: none;">
+          <i class="fa-solid fa-lock"></i> 다른 대원의 기록은 수정할 수 없습니다.
+        </div>
+
+        <button class="submit-log-btn" id="submitLogBtn">기록 저장하기</button>
+      </div>
+    </div>
+
+    <!-- 유저 검색 모달 -->
+    <div class="modal-overlay" id="searchUserModal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h4>안전 대원 검색</h4>
+          <button class="close-btn" id="closeSearchModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p class="modal-desc">함께 챌린지에 참여 중인 대원들의 달력을 둘러볼 수 있습니다.</p>
+        
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="userSearchInput" class="search-input" placeholder="대원 이름으로 검색...">
+        </div>
+
+        <div class="user-list-container" id="userListContainer">
+          <div class="loading-spinner-wrapper" id="userListLoading">
+            <i class="fa-solid fa-circle-notch fa-spin loading-spinner"></i>
+            <p>대원 목록을 불러오는 중...</p>
+          </div>
+          <div class="user-list" id="userList">
+            <!-- JS로 동적 렌더링 -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
